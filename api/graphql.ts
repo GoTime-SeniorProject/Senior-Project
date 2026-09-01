@@ -1,4 +1,12 @@
 import serverless from 'serverless-http';
-import app from '../data-access/dist/index.js';
+import { createApp } from '../data-access/dist/app.js';
 
-export default serverless(app);
+let handler: ReturnType<typeof serverless> | null = null;
+
+export default async function (req: any, res: any) {
+  if (!handler) {
+    const app = await createApp();
+    handler = serverless(app);
+  }
+  return handler(req, res);
+}
