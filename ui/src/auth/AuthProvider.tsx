@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { apolloClient } from '../lib/apollo-client';
 import {
   GetUserByUsernameDocument,
@@ -9,6 +9,15 @@ import {
   type GetUserQueryVariables,
 } from '../generated';
 import { AuthContext, type User } from './AuthContext';
+
+function withTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error('Request timed out')), ms)
+    ),
+  ]);
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
@@ -21,6 +30,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const [loading, setLoading] = useState(true);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -34,21 +51,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = useCallback(async () => {
     if (!user) {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
       return;
     }
-    setLoading(true);
+    if (isMounted.current) setLoading(true);
     try {
-      const { data } = await apolloClient.query<GetUserQuery, GetUserQueryVariables>({
-        query: GetUserDocument,
-        variables: { id: user.id as string },
-        fetchPolicy: 'network-only',
-      });
-      setUser(data?.getUser ?? null);
+      const { data } = await withTimeout(
+        apolloClient.query<GetUserQuery, GetUserQueryVariables>({
+          query: GetUserDocument,
+          variables: { id: user.id as string },
+        })
+      );
+      if (isMounted.current) setUser(data?.getUser ?? null);
     } catch {
-      setUser(null);
+      if (isMounted.current) setUser(null);
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   }, [user]);
 
@@ -59,14 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     setLoading(true);
     try {
-      const { data } = await apolloClient.query<
-        GetUserByUsernameQuery,
-        GetUserByUsernameQueryVariables
-      >({
-        query: GetUserByUsernameDocument,
-        variables: { username },
-        fetchPolicy: 'network-only',
-      });
+      const { data } = await withTimeout(
+        apolloClient.query<GetUserByUsernameQuery, GetUserByUsernameQueryVariables>({
+          query: GetUserByUsernameDocument,
+          variables: { username },
+        })
+      );
 
       const found = data?.getUsers?.[0];
       if (!found || found.password !== password) {
