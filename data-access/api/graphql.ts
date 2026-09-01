@@ -1,5 +1,5 @@
 import serverless from 'serverless-http';
-import { createApp } from '../data-access/dist/app.js';
+import { createApp } from '../dist/app.js';
 
 let handler: ReturnType<typeof serverless> | null = null;
 
