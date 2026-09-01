@@ -12,7 +12,8 @@
       "**/node_modules/**",
       "**/.react-router/**",
       "**/*.gen.ts",
-      "**/generated.tsx"
+      "**/generated.tsx",
+      "vercel.json"
     ]
   },
   "formatter": {
