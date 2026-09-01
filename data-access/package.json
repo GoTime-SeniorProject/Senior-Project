@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "vercel-build": "npm run build",
     "dev": "tsx watch src/server.ts",
     "start": "node dist/server.js",
     "gen": "graphql-codegen --config src/graphql/codegen.yml"
