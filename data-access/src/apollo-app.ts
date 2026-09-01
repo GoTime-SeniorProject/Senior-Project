@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { ApolloServer } from '@apollo/server';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import express from 'express';
 import cors from 'cors';
 import { typeDefs } from './graphql/schema/index.js';
@@ -89,6 +90,15 @@ export function createGraphQLApp(): express.Express {
   const app = express();
   app.use(cors({ origin: true, credentials: true }));
   app.use(express.json());
+
+  app.get('/graphql', async (_req, res) => {
+    const apolloServer = await createApolloServer();
+    const landingPage = ApolloServerPluginLandingPageLocalDefault();
+    const page = await (landingPage as any).renderLandingPage();
+    res.setHeader('Content-Type', 'text/html');
+    res.status(200).send(page.html);
+  });
+
   app.use('/graphql', graphqlHandler);
   app.use('/', graphqlHandler);
   return app;
