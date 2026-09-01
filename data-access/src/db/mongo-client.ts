@@ -45,6 +45,7 @@ export async function getDb(): Promise<Db> {
   });
 
   const mongoClient = getMongoClient();
+  console.log('[mongo-client] client created');
 
   console.log('[mongo-client] connecting...');
   await mongoClient.connect();
