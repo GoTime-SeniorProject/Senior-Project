@@ -4,7 +4,6 @@ let client: MongoClient | null = null;
 let db: Db | null = null;
 
 function getMongoClient() {
-  console.log('[mongo-client] getMongoClient called, client cached:', Boolean(client));
   if (client) {
     return client;
   }
@@ -16,8 +15,6 @@ function getMongoClient() {
   }
 
   const uri = `mongodb+srv://${encodeURIComponent(DB_USERNAME)}:${encodeURIComponent(DB_PASSWORD)}@${DB_HOST}/?appName=${encodeURIComponent(DB_APP_NAME)}`;
-  const safeUri = uri.replace(/:([^@]+)@/, ':****@');
-  console.log('[mongo-client] uri:', safeUri);
 
   client = new MongoClient(uri, {
     serverSelectionTimeoutMS: 5000,
@@ -31,7 +28,6 @@ function getMongoClient() {
     },
   });
 
-  console.log('[mongo-client] MongoClient instance created');
   return client;
 }
 
@@ -40,36 +36,11 @@ export async function getDb(): Promise<Db> {
     return db;
   }
 
-  console.log('[mongo-client] getDb called');
-  console.log('[mongo-client] env:', {
-    DB_USERNAME_SET: Boolean(process.env.DB_USERNAME),
-    DB_PASSWORD_SET: Boolean(process.env.DB_PASSWORD),
-    DB_HOST_SET: Boolean(process.env.DB_HOST),
-    DB_APP_NAME_SET: Boolean(process.env.DB_APP_NAME),
-    DB_NAME: process.env.DB_NAME,
-  });
-
   const mongoClient = getMongoClient();
-  console.log('[mongo-client] client created');
-
-  try {
-    console.log('[mongo-client] connecting...');
-    await Promise.race([
-      mongoClient.connect(),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('mongoClient.connect() timed out after 6s')), 6000)
-      ),
-    ]);
-    console.log('[mongo-client] connected, pinging admin...');
-    await mongoClient.db('admin').command({ ping: 1 });
-  } catch (err: any) {
-    console.error('[mongo-client] connection error:', err?.message ?? err);
-    throw err;
-  }
+  await mongoClient.connect();
+  await mongoClient.db('admin').command({ ping: 1 });
 
   const dbName = process.env.DB_NAME ?? 'greenlight';
-  console.log('Connected to MongoDB Atlas. Using database:', dbName);
-
   db = mongoClient.db(dbName);
 
   return db;

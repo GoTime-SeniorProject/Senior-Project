@@ -3,34 +3,5 @@
   "version": 2,
   "buildCommand": "npm run vercel-build",
   "outputDirectory": "ui/dist",
-  "framework": "vite",
-  "rewrites": [
-    {
-      "source": "/graphql/:path*",
-      "destination": "/api/graphql/:path*"
-    },
-    {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/graphql(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
-        }
-      ]
-    }
-  ]
+  "framework": "vite"
 }
