@@ -1,8 +1,8 @@
-import { createApp } from './apollo-app.js';
+import { createGraphQLApp } from './apollo-app.js';
 
 const PORT = process.env.PORT ?? 7071;
 
-const app = await createApp();
+const app = createGraphQLApp();
 app.listen(PORT, () => {
   console.log(`🚀 GraphQL server ready at http://localhost:${PORT}/graphql`);
 });
