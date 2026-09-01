@@ -35,4 +35,13 @@ app.use(
   })
 );
 
+app.use(
+  '/',
+  expressMiddleware(server, {
+    context: async () => ({
+      mongoDb: await getDb(),
+    }),
+  })
+);
+
 export default app;

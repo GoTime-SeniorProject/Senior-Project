@@ -7,11 +7,11 @@
   "rewrites": [
     {
       "source": "/graphql",
-      "destination": "/api/graphql/graphql"
+      "destination": "/api/graphql"
     },
     {
       "source": "/graphql/:path*",
-      "destination": "/api/graphql/graphql"
+      "destination": "/api/graphql"
     },
     {
       "source": "/((?!api/).*)",
