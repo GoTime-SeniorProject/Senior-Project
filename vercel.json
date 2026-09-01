@@ -6,12 +6,8 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/graphql",
-      "destination": "/api/graphql"
-    },
-    {
       "source": "/graphql/:path*",
-      "destination": "/api/graphql"
+      "destination": "/api/graphql/:path*"
     },
     {
       "source": "/((?!api/).*)",
