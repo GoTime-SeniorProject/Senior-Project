@@ -35,10 +35,10 @@ export async function createApp(): Promise<express.Express> {
     newApp.use(express.json());
 
     newApp.use((req, _res, next) => {
-      if (req.url.startsWith('/api/graphql')) {
-        req.url = req.url.replace('/api/graphql', '') || '/';
-      }
-      next();
+        if (req.url.startsWith('/api/graphql')) {
+            req.url = req.url.replace('/api/graphql', '') || '/';
+        }
+        next();
     });
 
     newApp.get('/health', (_req, res) => {
