@@ -23,6 +23,7 @@ function getMongoClient() {
     serverSelectionTimeoutMS: 5000,
     connectTimeoutMS: 5000,
     socketTimeoutMS: 10000,
+    family: 4,
     serverApi: {
       version: ServerApiVersion.v1,
       strict: true,
@@ -51,15 +52,20 @@ export async function getDb(): Promise<Db> {
   const mongoClient = getMongoClient();
   console.log('[mongo-client] client created');
 
-  console.log('[mongo-client] connecting...');
-  await Promise.race([
-    mongoClient.connect(),
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('mongoClient.connect() timed out after 6s')), 6000)
-    ),
-  ]);
-  console.log('[mongo-client] connected, pinging admin...');
-  await mongoClient.db('admin').command({ ping: 1 });
+  try {
+    console.log('[mongo-client] connecting...');
+    await Promise.race([
+      mongoClient.connect(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('mongoClient.connect() timed out after 6s')), 6000)
+      ),
+    ]);
+    console.log('[mongo-client] connected, pinging admin...');
+    await mongoClient.db('admin').command({ ping: 1 });
+  } catch (err: any) {
+    console.error('[mongo-client] connection error:', err?.message ?? err);
+    throw err;
+  }
 
   const dbName = process.env.DB_NAME ?? 'greenlight';
   console.log('Connected to MongoDB Atlas. Using database:', dbName);
