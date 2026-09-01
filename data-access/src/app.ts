@@ -34,18 +34,22 @@ export async function createApp(): Promise<express.Express> {
     newApp.use(cors());
     newApp.use(express.json());
 
-    newApp.use((req, _res, next) => {
-        if (req.url.startsWith('/api/graphql')) {
-            req.url = req.url.replace('/api/graphql', '') || '/';
-        }
-        next();
-    });
+    const context = async () => {
+        console.log('[app] GraphQL context starting');
+        const mongoDb = await getDb();
+        console.log('[app] GraphQL context ready');
+        return { mongoDb };
+    };
 
-    newApp.get('/health', (_req, res) => {
+    const apolloMiddleware = expressMiddleware(server, { context });
+
+    const apiRouter = express.Router();
+
+    apiRouter.get('/health', (_req, res) => {
         res.json({ ok: true, envLoaded: Boolean(process.env.DB_HOST) });
     });
 
-    newApp.get('/ping-db', async (_req, res) => {
+    apiRouter.get('/ping-db', async (_req, res) => {
         try {
             const mongoDb = await Promise.race([
                 getDb(),
@@ -61,15 +65,11 @@ export async function createApp(): Promise<express.Express> {
         }
     });
 
-    const context = async () => {
-        console.log('[app] GraphQL context starting');
-        const mongoDb = await getDb();
-        console.log('[app] GraphQL context ready');
-        return { mongoDb };
-    };
+    apiRouter.use('/graphql', apolloMiddleware);
+    apiRouter.use('/', apolloMiddleware);
 
-    newApp.use('/graphql', expressMiddleware(server, { context }));
-    newApp.use('/', expressMiddleware(server, { context }));
+    newApp.use(apiRouter);
+    newApp.use('/api/graphql', apiRouter);
 
     app = newApp;
     return app;
