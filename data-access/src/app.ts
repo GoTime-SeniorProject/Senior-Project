@@ -43,10 +43,57 @@ export async function createApp(): Promise<express.Express> {
 
     const apolloMiddleware = expressMiddleware(server, { context });
 
+    const customGraphqlHandler: express.RequestHandler = async (req, res) => {
+        try {
+            console.log('[app] customGraphqlHandler', req.method, req.url);
+            let query: string | undefined;
+            let variables: Record<string, unknown> | undefined;
+            let operationName: string | undefined;
+
+            if (req.method === 'POST') {
+                const body = req.body ?? {};
+                query = body.query;
+                variables = body.variables;
+                operationName = body.operationName;
+            } else if (req.method === 'GET') {
+                query = req.query.query as string | undefined;
+                variables = req.query.variables ? JSON.parse(req.query.variables as string) : undefined;
+                operationName = req.query.operationName as string | undefined;
+            }
+
+            if (!query) {
+                res.status(400).json({ errors: [{ message: 'Must provide query string.' }] });
+                return;
+            }
+
+            const result = await server.executeOperation(
+                { query, variables, operationName },
+                { contextValue: await context() }
+            );
+
+            if (result.body.kind === 'single') {
+                res.json(result.body.singleResult);
+            } else {
+                res.status(500).json({ errors: [{ message: 'Incremental responses not supported' }] });
+            }
+        } catch (err: any) {
+            console.error('[app] customGraphqlHandler error:', err);
+            res.status(500).json({ errors: [{ message: err.message ?? 'Internal server error' }] });
+        }
+    };
+
     const apiRouter = express.Router();
 
     apiRouter.get('/health', (_req, res) => {
         res.json({ ok: true, envLoaded: Boolean(process.env.DB_HOST) });
+    });
+
+    apiRouter.get('/test', (_req, res) => {
+        res.json({ ok: true, message: 'plain GET works' });
+    });
+
+    apiRouter.post('/test', express.json(), (_req, res) => {
+        res.json({ ok: true, message: 'plain POST works' });
     });
 
     apiRouter.get('/ping-db', async (_req, res) => {
@@ -65,7 +112,8 @@ export async function createApp(): Promise<express.Express> {
         }
     });
 
-    apiRouter.use('/graphql', apolloMiddleware);
+    apiRouter.use('/graphql', customGraphqlHandler);
+    apiRouter.use('/graphql-old', apolloMiddleware);
     apiRouter.use('/', apolloMiddleware);
 
     newApp.use(apiRouter);
