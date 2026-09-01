@@ -4,6 +4,7 @@ let client: MongoClient | null = null;
 let db: Db | null = null;
 
 function getMongoClient() {
+  console.log('[mongo-client] getMongoClient called, client cached:', Boolean(client));
   if (client) {
     return client;
   }
@@ -15,6 +16,8 @@ function getMongoClient() {
   }
 
   const uri = `mongodb+srv://${encodeURIComponent(DB_USERNAME)}:${encodeURIComponent(DB_PASSWORD)}@${DB_HOST}/?appName=${encodeURIComponent(DB_APP_NAME)}`;
+  const safeUri = uri.replace(/:([^@]+)@/, ':****@');
+  console.log('[mongo-client] uri:', safeUri);
 
   client = new MongoClient(uri, {
     serverSelectionTimeoutMS: 5000,
@@ -27,6 +30,7 @@ function getMongoClient() {
     },
   });
 
+  console.log('[mongo-client] MongoClient instance created');
   return client;
 }
 
@@ -48,7 +52,12 @@ export async function getDb(): Promise<Db> {
   console.log('[mongo-client] client created');
 
   console.log('[mongo-client] connecting...');
-  await mongoClient.connect();
+  await Promise.race([
+    mongoClient.connect(),
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('mongoClient.connect() timed out after 6s')), 6000)
+    ),
+  ]);
   console.log('[mongo-client] connected, pinging admin...');
   await mongoClient.db('admin').command({ ping: 1 });
 
