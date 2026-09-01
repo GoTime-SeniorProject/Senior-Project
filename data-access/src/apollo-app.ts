@@ -92,16 +92,20 @@ export function createGraphQLApp(): express.Express {
   app.use(express.json());
 
   app.get('/graphql', async (_req, res) => {
-    await createApolloServer();
-    const plugin = ApolloServerPluginLandingPageLocalDefault();
-    const handler = await (plugin as any).renderLandingPage?.();
-    if (typeof handler === 'function') {
-      handler(_req, res, () => undefined);
-      return;
+    try {
+      const landingPlugin = ApolloServerPluginLandingPageLocalDefault();
+      const serverWillStart = await (landingPlugin as any).serverWillStart({
+        apollo: { gateway: undefined, config: {}, logger: console },
+      });
+      const landingPage = await serverWillStart.renderLandingPage();
+      const html = await landingPage.html();
+      res.setHeader('Content-Type', 'text/html');
+      res.status(200).send(html);
+    } catch (err: any) {
+      console.error('[landing page] error:', err);
+      res.setHeader('Content-Type', 'text/html');
+      res.status(500).send('<!DOCTYPE html><html><body>Failed to load Apollo Sandbox</body></html>');
     }
-    const page = handler?.html ?? '<!DOCTYPE html><html><body>Apollo Sandbox</body></html>';
-    res.setHeader('Content-Type', 'text/html');
-    res.status(200).send(page);
   });
 
   app.use('/graphql', graphqlHandler);
