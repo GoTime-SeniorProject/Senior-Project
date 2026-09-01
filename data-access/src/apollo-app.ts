@@ -58,6 +58,25 @@ function parseGraphQLRequest(req: express.Request) {
   return {};
 }
 
+function isLocalRequest(req: express.Request): boolean {
+  // Never serve the landing page on Vercel-hosted deployments.
+  if (process.env.VERCEL) {
+    return false;
+  }
+
+  const host = (req.get('host') ?? '').toLowerCase();
+  const forwardedHost = (req.get('x-forwarded-host') ?? '').toLowerCase();
+  const localHosts = ['localhost', '127.0.0.1', '[::1]'];
+
+  return localHosts.some(
+    (h) =>
+      host === h ||
+      host.startsWith(`${h}:`) ||
+      forwardedHost === h ||
+      forwardedHost.startsWith(`${h}:`)
+  );
+}
+
 const graphqlHandler: express.RequestHandler = async (req, res) => {
   try {
     const { query, variables, operationName } = parseGraphQLRequest(req);
@@ -91,7 +110,20 @@ export function createGraphQLApp(): express.Express {
   app.use(cors({ origin: true, credentials: true }));
   app.use(express.json());
 
-  app.get('/graphql', async (_req, res) => {
+  app.get('/graphql', async (req, res, next) => {
+    // Allow GET queries (e.g. ?query={__typename}) to pass through to the GraphQL handler.
+    if (req.query.query) {
+      next();
+      return;
+    }
+
+    // The Apollo Sandbox landing page should only be reachable on localhost.
+    if (!isLocalRequest(req)) {
+      res.setHeader('Content-Type', 'text/plain');
+      res.status(403).send('Apollo Sandbox is only available on localhost.');
+      return;
+    }
+
     try {
       const landingPlugin = ApolloServerPluginLandingPageLocalDefault();
       const serverWillStart = await (landingPlugin as any).serverWillStart({
