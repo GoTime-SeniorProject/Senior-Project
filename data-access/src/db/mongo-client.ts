@@ -35,9 +35,20 @@ export async function getDb(): Promise<Db> {
     return db;
   }
 
+  console.log('[mongo-client] getDb called');
+  console.log('[mongo-client] env:', {
+    DB_USERNAME_SET: Boolean(process.env.DB_USERNAME),
+    DB_PASSWORD_SET: Boolean(process.env.DB_PASSWORD),
+    DB_HOST_SET: Boolean(process.env.DB_HOST),
+    DB_APP_NAME_SET: Boolean(process.env.DB_APP_NAME),
+    DB_NAME: process.env.DB_NAME,
+  });
+
   const mongoClient = getMongoClient();
 
+  console.log('[mongo-client] connecting...');
   await mongoClient.connect();
+  console.log('[mongo-client] connected, pinging admin...');
   await mongoClient.db('admin').command({ ping: 1 });
 
   const dbName = process.env.DB_NAME ?? 'greenlight';

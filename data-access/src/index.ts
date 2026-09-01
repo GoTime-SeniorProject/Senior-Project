@@ -26,21 +26,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/health', (_req, res) => {
+  res.json({ ok: true, envLoaded: Boolean(process.env.DB_HOST) });
+});
+
 app.use(
   '/graphql',
   expressMiddleware(server, {
-    context: async () => ({
-      mongoDb: await getDb(),
-    }),
+    context: async () => {
+      console.log('[index] /graphql context starting');
+      const mongoDb = await getDb();
+      console.log('[index] /graphql context ready');
+      return { mongoDb };
+    },
   })
 );
 
 app.use(
   '/',
   expressMiddleware(server, {
-    context: async () => ({
-      mongoDb: await getDb(),
-    }),
+    context: async () => {
+      console.log('[index] / context starting');
+      const mongoDb = await getDb();
+      console.log('[index] / context ready');
+      return { mongoDb };
+    },
   })
 );
 
