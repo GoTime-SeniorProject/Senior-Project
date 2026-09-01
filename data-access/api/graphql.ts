@@ -5,9 +5,19 @@ import { createApp } from '../dist/app.js';
 let handler: ReturnType<typeof serverless> | null = null;
 
 export default async function (req: any, res: any) {
-  if (!handler) {
-    const app = await createApp();
-    handler = serverless(app);
+  try {
+    if (!handler) {
+      console.log('[api/graphql] initializing handler');
+      const app = await createApp();
+      console.log('[api/graphql] app created');
+      handler = serverless(app);
+      console.log('[api/graphql] serverless handler created');
+    }
+    return handler(req, res);
+  } catch (err: any) {
+    console.error('[api/graphql] init error:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: err?.message ?? 'Internal server error' });
+    }
   }
-  return handler(req, res);
 }

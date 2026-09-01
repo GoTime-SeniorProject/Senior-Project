@@ -11,7 +11,9 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.resolve(__dirname, '../../.env.local');
-dotenv.config({ path: envPath });
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: envPath });
+}
 
 let app: express.Express | null = null;
 
