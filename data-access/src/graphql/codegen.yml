@@ -25,7 +25,7 @@ generates:
       apolloReactHooksImportFrom: '@apollo/client/react'
       apolloReactCommonImportFrom: '@apollo/client'
 
-  ../ui-student/src/generated.tsx:
+  ../ui/src/generated.tsx:
     plugins:
       - add:
           content: |-

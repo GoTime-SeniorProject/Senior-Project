@@ -5,7 +5,7 @@ Base web application for the senior project. Built with a Vite + React + TypeScr
 ## Structure
 
 - `data-access/` — GraphQL API and MongoDB data layer
-- `ui-student/` — Student-facing web application
+- `ui/` — User-facing web application
 - `api/graphql.ts` — Vercel serverless entry point for the GraphQL API
 - `vercel.json` — Vercel deployment configuration
 
@@ -23,13 +23,13 @@ npm install
 cp .env.example .env.local
 ```
 
-Fill in `.env.local` with your MongoDB credentials (`DB_USERNAME`, `DB_PASSWORD`, `DB_HOST`, `DB_APP_NAME`). The `DB_NAME` defaults to `greenlight`.
+Fill in `.env.local` with your MongoDB credentials (`DB_USERNAME`, `DB_PASSWORD`, `DB_HOST`, `DB_APP_NAME`). The `DB_NAME` defaults to `senior-project`.
 
 3. Start the backend and frontend (in separate terminals):
 
 ```bash
 npm run dev -w data-access
-npm run dev -w ui-student
+npm run dev -w ui
 ```
 
 The frontend dev server proxies `/graphql` to the backend at `http://localhost:7071`.
@@ -71,7 +71,7 @@ vercel
 vercel --prod
 ```
 
-The frontend is served from `ui-student/dist`, and `/graphql` is routed to the serverless function in `api/graphql.ts`.
+The frontend is served from `ui/dist`, and `/graphql` is routed to the serverless function in `api/graphql.ts`.
 
 ## Notes
 

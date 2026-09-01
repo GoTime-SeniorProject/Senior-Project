@@ -3,19 +3,20 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "workspaces": ["data-access", "ui-student"],
+  "workspaces": ["data-access", "ui"],
   "scripts": {
-    "dev": "concurrently \"npm run dev -w data-access\" \"npm run dev -w ui-student\"",
+    "dev": "concurrently \"npm run dev -w data-access\" \"npm run dev -w ui\"",
     "prebuild": "npm run format:check && npm run lint:check",
-    "build": "npm run build -w data-access && npm run build -w ui-student",
-    "vercel-build": "npm run prebuild && npm run build",
+    "build": "npm run build -w data-access && npm run build -w ui",
+    "vercel-build": "npm run build",
+    "gen": "npm run gen --workspace=data-access",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "lint": "biome lint --write .",
     "lint:check": "biome lint .",
     "check": "biome check --write .",
     "check:ci": "biome ci .",
-    "typecheck": "npm run typecheck -w ui-student"
+    "typecheck": "npm run typecheck -w ui"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
