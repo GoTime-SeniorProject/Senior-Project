@@ -113,8 +113,7 @@ export async function createApp(): Promise<express.Express> {
     });
 
     apiRouter.use('/graphql', customGraphqlHandler);
-    apiRouter.use('/graphql-old', apolloMiddleware);
-    apiRouter.use('/', apolloMiddleware);
+    apiRouter.use('/', customGraphqlHandler);
 
     newApp.use(apiRouter);
     newApp.use('/api/graphql', apiRouter);
