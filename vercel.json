@@ -7,16 +7,20 @@
   "rewrites": [
     {
       "source": "/graphql",
-      "destination": "/api/graphql"
+      "destination": "/api/graphql/graphql"
     },
     {
       "source": "/graphql/:path*",
-      "destination": "/api/graphql"
+      "destination": "/api/graphql/graphql"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/graphql",
+      "source": "/graphql(.*)",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
