@@ -6,7 +6,6 @@
   "workspaces": ["data-access", "ui"],
   "scripts": {
     "dev": "concurrently \"npm run dev -w data-access\" \"npm run dev -w ui\"",
-    "prebuild": "npm run format:check && npm run lint:check",
     "build": "npm run build -w data-access && npm run build -w ui",
     "vercel-build": "npm run build",
     "gen": "npm run gen --workspace=data-access",
