@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 import { ApolloServer } from '@apollo/server';
-import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import {
+  ApolloServerPluginLandingPageLocalDefault,
+  ApolloServerPluginLandingPageProductionDefault,
+} from '@apollo/server/plugin/landingPage/default';
 import express from 'express';
 import cors from 'cors';
 import { typeDefs } from './graphql/schema/index.js';
@@ -117,15 +120,13 @@ export function createGraphQLApp(): express.Express {
       return;
     }
 
-    // The Apollo Sandbox landing page should only be reachable on localhost.
-    if (!isLocalRequest(req)) {
-      res.setHeader('Content-Type', 'text/plain');
-      res.status(403).send('Apollo Sandbox is only available on localhost.');
-      return;
-    }
+    // Use the official Apollo landing page. Sandbox is only for localhost;
+    // hosted deployments get the "use POST" landing page.
+    const landingPlugin = isLocalRequest(req)
+      ? ApolloServerPluginLandingPageLocalDefault()
+      : ApolloServerPluginLandingPageProductionDefault();
 
     try {
-      const landingPlugin = ApolloServerPluginLandingPageLocalDefault();
       const serverWillStart = await (landingPlugin as any).serverWillStart({
         apollo: { gateway: undefined, config: {}, logger: console },
       });
@@ -136,7 +137,7 @@ export function createGraphQLApp(): express.Express {
     } catch (err: any) {
       console.error('[landing page] error:', err);
       res.setHeader('Content-Type', 'text/html');
-      res.status(500).send('<!DOCTYPE html><html><body>Failed to load Apollo Sandbox</body></html>');
+      res.status(500).send('<!DOCTYPE html><html><body>Failed to load Apollo landing page</body></html>');
     }
   });
 
