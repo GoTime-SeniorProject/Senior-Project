@@ -3,16 +3,6 @@
   "version": 2,
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "rewrites": [
-    {
-      "source": "/graphql",
-      "destination": "/api/graphql"
-    },
-    {
-      "source": "/graphql/:path*",
-      "destination": "/api/graphql"
-    }
-  ],
   "headers": [
     {
       "source": "/graphql(.*)",
