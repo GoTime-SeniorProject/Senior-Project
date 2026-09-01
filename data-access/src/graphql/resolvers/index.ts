@@ -1,12 +1,12 @@
-import { queryResolvers } from "./query.resolvers.js";
-import { mutationResolvers } from "./mutation.resolvers.js";
+import { queryResolvers } from './query.resolvers.js';
+import { mutationResolvers } from './mutation.resolvers.js';
 
 export const resolvers = {
-    Query: {
-        ...queryResolvers,
-    },
+  Query: {
+    ...queryResolvers,
+  },
 
-    Mutation: {
-        ...mutationResolvers,
-    },
+  Mutation: {
+    ...mutationResolvers,
+  },
 };

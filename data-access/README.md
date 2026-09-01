@@ -1,31 +1,41 @@
-Data-access Node service (MongoDB + GraphQL codegen)
+# data-access
 
-Setup:
+GraphQL API service backed by MongoDB.
 
-1. Setup `.env.local` with DB env vars from MongoDB:
-	- `MONGODB_URI`
-	- `DB_USERNAME`
-	- `DB_PASSWORD`
-	- `DB_NAME`
-    - `DB_HOST` 
-	The server will also try to read `../.htaccess` if these env vars are missing.
+## Setup
+
+1. Copy `.env.example` to `.env.local` in the workspace root and fill in the MongoDB credentials:
+   - `DB_USERNAME`
+   - `DB_PASSWORD`
+   - `DB_HOST`
+   - `DB_APP_NAME`
+   - `DB_NAME` (defaults to `greenlight`)
 
 2. Install dependencies:
 
 ```bash
-npm i
+npm install
 ```
 
-Run dev server:
+## Development
+
+Run the local GraphQL server:
 
 ```bash
-vercel dev
+npm run dev
 ```
 
-GraphQL sandbox runs at http://localhost:7071/graphql by default.
+The sandbox is available at http://localhost:7071/graphql by default.
 
-Generate types:
+## Production / Vercel
+
+The root `vercel.json` routes `/graphql` to the serverless function in `api/graphql.ts`, which uses the built output of this package (`data-access/dist`). Make sure the Vercel project has the same MongoDB environment variables configured.
+
+## Code generation
+
+Regenerate TypeScript types from the GraphQL schema:
 
 ```bash
-npm gen
+npm run gen
 ```
+

@@ -29,7 +29,7 @@ const createPassthroughScalar = (name: string) =>
     name,
     serialize: (value) => value,
     parseValue: (value) => value,
-    parseLiteral: (ast) => (ast.kind === Kind.STRING ? ast.value : null)
+    parseLiteral: (ast) => (ast.kind === Kind.STRING ? ast.value : null),
   });
 
 export const DateScalar = createPassthroughScalar('Date');
@@ -39,5 +39,5 @@ export const JsonScalar = new GraphQLScalarType({
   name: 'JSON',
   serialize: (value) => value,
   parseValue: (value) => value,
-  parseLiteral: (ast) => parseJsonLiteral(ast)
+  parseLiteral: (ast) => parseJsonLiteral(ast),
 });

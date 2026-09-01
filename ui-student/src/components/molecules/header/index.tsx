@@ -1,47 +1,47 @@
-import type React from 'react';
-import { Layout, Button, Grid } from 'antd';
-import styles from './index.module.css';
-import logoIcon from '../../assets/GreenlightLogo.svg';
-import { useNavigate } from 'react-router';
+import { AppBar, Box, Toolbar, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 export interface HeaderProps {
-	isAuthenticated?: boolean;
-	user?: any;
+  user?: Record<string, unknown>;
 }
 
-const { Header: AntHeader } = Layout;
+export function Header({ user }: HeaderProps) {
+  const navigate = useNavigate();
+  const organization = user?.organization as Record<string, unknown> | undefined;
+  const orgName = organization?.orgName ? String(organization.orgName).toUpperCase() : '';
 
-export const Header: React.FC<HeaderProps> = ({
-	isAuthenticated = true,
-	user,
-}) => {
-    const noop = () => undefined;
-	const navigate = useNavigate();
-	const screens = Grid.useBreakpoint();
+  return (
+    <AppBar position='static' elevation={1} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <Toolbar>
+        <Box
+          component='a'
+          href='/'
+          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+            e.preventDefault();
+            navigate('/');
+          }}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            cursor: 'pointer',
+            flexGrow: 1,
+            textDecoration: 'none',
+            color: 'inherit',
+          }}
+        >
+          <Typography variant='h6' component='div' fontWeight={600}>
+            Senior Project
+          </Typography>
+          {orgName && (
+            <Typography variant='body2' color='inherit' sx={{ opacity: 0.8 }}>
+              {orgName}
+            </Typography>
+          )}
+        </Box>
+      </Toolbar>
+    </AppBar>
+  );
+}
 
-	return (
-		<AntHeader className={styles.header}>
-			<div
-				className={styles.logoSection}
-				role="button"
-				tabIndex={0}
-				onClick={() => navigate('/')}
-				onKeyDown={(e) => {
-					if (e.key === 'Enter' || e.key === ' ') navigate('/');
-				}}
-				style={{ cursor: 'pointer' }}
-			>
-				<img src={logoIcon} alt="Greenlight Logo" className={styles.logo} />
-				<div>
-					<span className={styles.logoText}>GreenLight</span>
-					<span className={styles.orgName}>{user?.organization?.orgName ? String(user.organization.orgName).toUpperCase() : ''}</span>
-				</div>
-			</div>
-			<div className={`${styles.userSection} px-8`}>
-				<Button type={screens.lg ? 'primary' : 'default'} className={styles.btn} onClick={() => navigate('/event-form')}>
-					New Event
-				</Button>
-			</div>
-		</AntHeader>
-	);
-};
+export default Header;

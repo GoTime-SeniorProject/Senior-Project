@@ -8,17 +8,10 @@ function getMongoClient() {
     return client;
   }
 
-  const {
-    DB_USERNAME,
-    DB_PASSWORD,
-    DB_HOST,
-    DB_APP_NAME,
-  } = process.env;
+  const { DB_USERNAME, DB_PASSWORD, DB_HOST, DB_APP_NAME } = process.env;
 
   if (!DB_USERNAME || !DB_PASSWORD || !DB_HOST || !DB_APP_NAME) {
-    throw new Error(
-      'DB_USERNAME, DB_PASSWORD, DB_HOST, and DB_APP_NAME must be set.'
-    );
+    throw new Error('DB_USERNAME, DB_PASSWORD, DB_HOST, and DB_APP_NAME must be set.');
   }
 
   const uri = `mongodb+srv://${encodeURIComponent(DB_USERNAME)}:${encodeURIComponent(DB_PASSWORD)}@${DB_HOST}/?appName=${encodeURIComponent(DB_APP_NAME)}`;
@@ -44,9 +37,10 @@ export async function getDb(): Promise<Db> {
   await mongoClient.connect();
   await mongoClient.db('admin').command({ ping: 1 });
 
-  console.log('Connected to MongoDB Atlas.');
+  const dbName = process.env.DB_NAME ?? 'greenlight';
+  console.log('Connected to MongoDB Atlas. Using database:', dbName);
 
-  db = mongoClient.db(process.env.DB_NAME ?? 'greenlight');
+  db = mongoClient.db(dbName);
 
   return db;
 }

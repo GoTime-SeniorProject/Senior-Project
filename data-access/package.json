@@ -1,10 +1,12 @@
 {
-  "name": "data-access-minimal",
-  "version": "0.1.0",
+  "name": "data-access",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
     "gen": "graphql-codegen --config src/graphql/codegen.yml"
   },
   "dependencies": {

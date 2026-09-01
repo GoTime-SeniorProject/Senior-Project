@@ -1,118 +1,57 @@
-import { useEffect, Suspense } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router';
+import { Suspense, useEffect } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { AuthProvider } from '../auth/AuthProvider';
+import { useAuth } from '../auth/useAuth';
 import { AppLayout } from '../components/organisms/app-layout';
-import { ConfigProvider } from 'antd';
-import { AuthProvider, useAuth } from '../auth/AuthProvider';
-import Loading from '../components/molecules/loading/Loading';
-
+import { Loading } from '../components/molecules/loading/Loading';
 
 export default function RootLayout() {
-    return (
-        <ConfigProvider
-            theme={{
-                token: {
-                    wireframe: false,
-                    borderRadius: 11,
-                    colorPrimary: "#045966",
-                    colorInfo: "#045966",
-                },
-                components: {
-                    Table: {
-                        headerBg: "var(--sage-3)",
-                        headerSplitColor: "rgba(0, 0, 0, 0.06)",
-                        borderColor: "rgba(0, 0, 0, 0.06)",
-                        rowHoverBg: "rgba(0, 0, 0, 0.06)",
-                        headerBorderRadius: 0,
-                        borderRadius: 0,
-                    },
-                    Checkbox: {
-                        borderRadiusSM: 0,
-                    },
-                    Popover: {
-                        borderRadiusLG: 0,
-                        borderRadiusXS: 0,
-                    }
-                }
-            }}
-        >
-            <AuthProvider>
-                <AuthGate />
-            </AuthProvider>
-        </ConfigProvider>
-    );
+  return (
+    <AuthProvider>
+      <AuthGate />
+    </AuthProvider>
+  );
 }
 
+const titles: Record<string, string> = {
+  '/': 'Home | Senior Project',
+  '/login': 'Login | Senior Project',
+};
+
 function AuthGate() {
-    const location = useLocation();
-    const { user, loading, logout } = useAuth();
-    const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { user, loading, logout } = useAuth();
 
-    // Set document title and favicon
-    useEffect(() => {
-        const mapTitles: Record<string, string> = {
-            "/": "Home | GreenLight",
-            "/login": "Login | GreenLight",
-            "/database-dump": "Database Dump | GreenLight",
-            "/antd-example": "Ant Design Example | GreenLight",
-            "/event-submissions": "Event Submissions | GreenLight",
-            "/purchase-requests": "Purchase Requests | GreenLight",
-            "/budget": "Budget | GreenLight",
-            "/resources": "Resources | GreenLight",
-            "/calendar": "Calendar | GreenLight",
-            "/org-members": "Organization Members | GreenLight",
-            "/event-form": "Event Form | GreenLight",
-        };
+  useEffect(() => {
+    document.title = titles[pathname] ?? 'Senior Project';
+  }, [pathname]);
 
-        document.title = mapTitles[location.pathname] ?? "GreenLight";
-
-        let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
-        if (!link) {
-            link = document.createElement("link");
-            link.rel = "icon";
-            document.head.appendChild(link);
-        }
-        link.type = "image/svg+xml";
-        link.href = `${(import.meta as any).env?.BASE_URL ?? '/'}GreenlightLogo.svg`;
-    }, [location.pathname]);
-
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
-
-    const isLoginRoute = location.pathname === '/login';
-
-    // Avoid render-time redirects (which can cause update loops) by navigating in effects.
-    useEffect(() => {
-        if (!isLoginRoute && !user && !loading) {
-            navigate('/login', { replace: true, state: { from: location } });
-        }
-    }, [isLoginRoute, user, loading, navigate, location]);
-
-    useEffect(() => {
-        if (user && isLoginRoute) {
-            navigate('/', { replace: true });
-        }
-    }, [user?.id, isLoginRoute, navigate]);
-
-    if (loading) {
-        return <Loading text="Checking authentication..." />;
+  useEffect(() => {
+    const isLoginRoute = pathname === '/login';
+    if (!isLoginRoute && !user && !loading) {
+      navigate('/login', { replace: true });
     }
-
-    if (isLoginRoute) {
-        return <Outlet />;
+    if (user && isLoginRoute) {
+      navigate('/', { replace: true });
     }
+  }, [pathname, user, loading, navigate]);
 
-    if (!user) {
-        // allow effect to handle redirect; don't block render
-        return <Outlet />;
-    }
+  if (loading) {
+    return <Loading text='Checking authentication...' />;
+  }
 
-    return (
-        <AppLayout isAuthenticated={true} user={user} onLogout={handleLogout}>
-            <Suspense fallback={<Loading />}>
-                <Outlet />
-            </Suspense>
-        </AppLayout>
-    );
+  const isLoginRoute = location.pathname === '/login';
+
+  if (isLoginRoute || !user) {
+    return <Outlet />;
+  }
+
+  return (
+    <AppLayout user={user} onLogout={logout}>
+      <Suspense fallback={<Loading />}>
+        <Outlet />
+      </Suspense>
+    </AppLayout>
+  );
 }

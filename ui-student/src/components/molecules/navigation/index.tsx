@@ -1,233 +1,115 @@
-import type React from 'react';
-import { useEffect, useState } from 'react';
-import { Layout, Menu, Button, Drawer, ConfigProvider, Avatar, Popconfirm } from 'antd';
-import type { MenuProps } from 'antd';
+import { useState } from 'react';
 import {
-	LineChartOutlined,
-	DollarOutlined,
-	CalendarOutlined,
-	FolderOutlined,
-	BulbOutlined,
-	LogoutOutlined,
-	MenuOutlined,
-	CloseOutlined,
-	HomeOutlined,
-	UserOutlined,
-} from '@ant-design/icons';
-import styles from './index.module.css';
-import { useMatch, useNavigate, useLocation, Link } from 'react-router';
+  Box,
+  Button,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+} from '@mui/material';
+import { Home, Logout, Menu } from '@mui/icons-material';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export interface NavigationProps {
-	isAuthenticated: boolean;
-	user?: any;
-	onLogout?: () => void;
-	onNavigate?: (route: string) => void;
-	selectedKey?: string;
-	customNavItems?: MenuProps['items'];
+  onLogout?: () => void;
 }
 
-const { Sider } = Layout;
+const DRAWER_WIDTH = 240;
 
-const defaultNavItems: MenuProps['items'] = [
-	{ key: 'dashboard', icon: <HomeOutlined />, label: <Link to="/">Dashboard</Link> },
-	{ key: 'event-submissions', icon: <CalendarOutlined />, label: <Link to="/event-submissions">Event Submissions</Link> },
-	{ key: 'budget', icon: <DollarOutlined />, label: <Link to="/budget">Budget</Link> },
-	{
-		key: 'brainstorm',
-		icon: <BulbOutlined />,
-		label: 'Brainstorm',
-		children: [
-			{ key: 'docs-overview', label: <Link to="/brainstorm/docs">Docs</Link> },
-			{ key: 'sheets-overview', label: <Link to="/brainstorm/sheets">Sheets</Link> },
-		],
-	},
-	{ key: 'resources', icon: <FolderOutlined />, label: <Link to="/resources">Resources</Link> },
-	{ key: 'calendar', icon: <CalendarOutlined />, label: <Link to="/calendar">Calendar</Link> },
-	{ key: 'org-members', icon: <UserOutlined />, label: <Link to="/org-members">Org Members</Link> },
+const navItems = [{ key: 'dashboard', label: 'Home', icon: <Home />, path: '/' }];
 
-];
+export function Navigation({ onLogout }: NavigationProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-export const Navigation: React.FC<NavigationProps> = ({
-	isAuthenticated,
-	user,
-	onLogout,
-	onNavigate,
-	selectedKey,
-	customNavItems,
-}) => {
-	const [collapsed, setCollapsed] = useState(false);
-	const [mobileOpen, setMobileOpen] = useState(false);
-	const [openKeys, setOpenKeys] = useState<string[]>([]);
-	const accountPath = useMatch('/account/*');
+  const handleToggle = () => setMobileOpen((open) => !open);
+  const handleClose = () => setMobileOpen(false);
 
-	useEffect(() => {
-		if (accountPath) {
-			setOpenKeys(['account']);
-		}
-	}, [accountPath]);
-
-	const navItems = customNavItems || defaultNavItems;
-
-	// router hooks (call at top-level of component)
-	const navigate = useNavigate();
-	const location = useLocation();
-
-	// compute selected key based on current path, handling nested routes
-	const getSelectedKeyFromPath = (path: string) => {
-		if (!path || path === '/') return 'dashboard';
-		const parts = path.replace(/^\//, '').split('/');
-		if (parts[0] === 'brainstorm') {
-			if (parts[1] === 'docs') return 'docs-overview';
-			if (parts[1] === 'sheets') return 'sheets-overview';
-			return 'brainstorm';
-		}
-		return parts[0];
-	};
-
-	useEffect(() => {
-		const derived = getSelectedKeyFromPath(location.pathname);
-		if (derived === 'docs-overview' || derived === 'sheets-overview' || derived === 'brainstorm') {
-			setOpenKeys(['brainstorm']);
-		}
-	}, [location.pathname]);
-
-	const handleMenuClick: React.ComponentProps<typeof Menu>['onClick'] = (e) => {
-		const { key } = e;
-		setOpenKeys(e.keyPath);
-		if (onNavigate) {
-			onNavigate(key);
-		}
-
-		setMobileOpen(false);
-	};
-
-	const onMenuOpenChange = (keys: string[]) => {
-		setOpenKeys(keys);
-	};
-
-	// Responsive: show Drawer on mobile, Sider on desktop
-
-	return (
-		<ConfigProvider
-            theme={{
-                "components": {
-                    "Menu": {
-					"colorBgContainer": "var(--primary)",
-					"colorFillAlter": "var(--primary)",
-					"colorText": "var(--background-2)",
-					"itemHoverBg": "var(--primary-active)",
-					"itemSelectedBg": "var(--primary-active)",
-					"itemActiveBg": "var(--primary-disabled)",
-					"itemColor": "var(--background-2)",
-					"itemSelectedColor": "var(--background-2)",
-					"subMenuItemSelectedColor": "var(--background-2)",
-					"colorBgElevated": "var(--primary)",
-					"itemBorderRadius": 0,
-					"itemMarginInline": 0,
-					"itemMarginBlock": 0,
-					},
-					"Button": {
-						"colorText": "var(--background-2)",
-					}
-                }
-            }}
+  const drawerContent = (
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Toolbar />
+      <Divider />
+      <List sx={{ flex: 1 }}>
+        {navItems.map((item) => (
+          <ListItem key={item.key} disablePadding>
+            <ListItemButton
+              selected={location.pathname === item.path}
+              onClick={() => {
+                navigate(item.path);
+                handleClose();
+              }}
+            >
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.label} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <Box sx={{ p: 2 }}>
+        <Button
+          fullWidth
+          variant='outlined'
+          color='inherit'
+          startIcon={<Logout />}
+          onClick={onLogout}
         >
-			{/* Hamburger for mobile (top right) - only if authenticated */}
-			{isAuthenticated && (
-				<div className={styles.hamburgerContainer} style={{ zIndex: 1050 }}>
-					<Button
-						className={styles.hamburger ?? ''}
-						icon={mobileOpen ? <CloseOutlined style={{ color: 'var(--background-2)' }}/> : <MenuOutlined style={{ color: 'var(--background-2)' }}/>}
-						onClick={() => setMobileOpen(!mobileOpen)}
-						type="text"
-						aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'}
-					/>
-				</div>
-			)}
-			{/* Desktop Sider */}
-			{isAuthenticated && (
-				<Sider
-					className={styles.sidebar ?? ''}
-					breakpoint="lg"
-					collapsedWidth="0"
-					width={208}
-					trigger={null}
-					collapsible
-					collapsed={collapsed}
-					onCollapse={setCollapsed}
-					style={{ position: 'fixed', left: 0, top: 64, zIndex: 1000 }}
-				>
-					<Menu
-						mode="inline"
-						items={navItems}
-						onClick={handleMenuClick}
-						style={{ fontFamily: 'var(--font-body)', border: 'none', flex: 1 }}
-						selectedKeys={[selectedKey || getSelectedKeyFromPath(location.pathname)]}
-						openKeys={openKeys}
-						onOpenChange={onMenuOpenChange}
-					/>
-					<div className={styles.userSection}>
-						{(() => {
-							const src = user?.profileImg;
-							if (!src) return <Avatar icon={<UserOutlined />} />;
-							const base = (import.meta as any).env?.BASE_URL ?? '/';
-							const normalizedBase = base.endsWith('/') ? base : `${base}/`;
-							const profilePath = `${normalizedBase}uploads/profile_img/${src}`.replace(/\\/g, '/');
-							return <Avatar className={styles.avatar} src={profilePath} />;
-						})()}
+          Sign out
+        </Button>
+      </Box>
+    </Box>
+  );
 
-						<div>
-							<span className={styles.userName}>{user?.firstName} {user?.lastName ? user.lastName.charAt(0) + '.' : ''}</span>
-						</div>
-						<Popconfirm title="Are you sure you want to log out?" onConfirm={() => onLogout && onLogout()} okText="Yes" cancelText="No">
-							<Button
-								className={styles.logout}
-								icon={<LogoutOutlined />}
-								type="link"
-							/>
-						</Popconfirm>
-					</div>
-				</Sider>
-			)}
-			{/* Mobile Drawer */}
-			{isAuthenticated && (
-				<Drawer
-					placement="left"
-					open={mobileOpen}
-					onClose={() => setMobileOpen(false)}
-					width={208}
-					style={{ top: 68, zIndex: 1000 }}
-				>
-					<Menu
-						mode="inline"
-						items={navItems}
-						onClick={handleMenuClick}
-						style={{ border: 'none', flex: 1 }}
-						selectedKeys={[selectedKey || (location.pathname === '/' ? 'dashboard' : location.pathname.replace(/^\//, '').split('/')[0]) ]}
-					/>
-					<div className={styles.userSection}>
-						{(() => {
-							const src = user?.profileImg;
-							if (!src) return <Avatar icon={<UserOutlined />} />;
-							const base = (import.meta as any).env?.BASE_URL ?? '/';
-							const normalizedBase = base.endsWith('/') ? base : `${base}/`;
-							const profilePath = `${normalizedBase}uploads/profile_img/${src}`.replace(/\\/g, '/');
-							return <Avatar className={styles.avatar} src={profilePath} />;
-						})()}
+  return (
+    <>
+      <IconButton
+        color='inherit'
+        aria-label='open navigation'
+        edge='start'
+        onClick={handleToggle}
+        sx={{
+          position: 'fixed',
+          top: 12,
+          right: 16,
+          zIndex: (theme) => theme.zIndex.drawer + 2,
+          display: { md: 'none' },
+        }}
+      >
+        <Menu />
+      </IconButton>
 
-						<div>
-							<span className={styles.userName}>{user?.firstName} {user?.lastName ? user.lastName.charAt(0) + '.' : ''}</span>
-						</div>
-						<Popconfirm title="Are you sure you want to log out?" onConfirm={() => onLogout && onLogout()} okText="Yes" cancelText="No">
-							<Button
-								className={styles.logout}
-								icon={<LogoutOutlined />}
-								type="link"
-							/>
-						</Popconfirm>
-					</div>
-				</Drawer>
-			)}
-		</ConfigProvider>
-	);
-};
+      <Box component='nav' sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}>
+        <Drawer
+          variant='temporary'
+          open={mobileOpen}
+          onClose={handleClose}
+          ModalProps={{ keepMounted: true }}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+        <Drawer
+          variant='permanent'
+          open
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+      </Box>
+    </>
+  );
+}
+
+export default Navigation;

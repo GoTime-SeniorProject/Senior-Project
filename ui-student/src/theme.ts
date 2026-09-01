@@ -1,27 +1,36 @@
-const theme = {
+import { createTheme } from '@mui/material/styles';
 
-    // token: {
-    //     colorPrimary: 'var(--color-brand-primary)',
-    //     colorPrimaryHover: 'var(--color-brand-primary-hover)',
-    //     colorInfo: 'var(--color-brand-primary)',
-    //     colorBgBase: 'var(--color-bg-layout)',
-    //     colorBgContainer: 'var(--color-bg-surface)',
-    //     colorBorderSecondary: 'none',
-    // },
-    components: {
-        Modal: {
-            borderRadiusLG: 8,
-            paddingContentHorizontal: 24,
-            paddingContentVertical: 16,
-            paddingHeader: 16,
-            paddingFooter: 10,
-        },
-        Button: {
-            borderRadiusLG: 8,
-            padding: 12,
-            boxShadow: 'none',
-        },
+export const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#045966',
+      contrastText: '#ffffff',
     },
-};
-
-export { theme };
+    secondary: {
+      main: '#aa3bff',
+    },
+    background: {
+      default: '#f5f5f5',
+      paper: '#ffffff',
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h1: { fontWeight: 600 },
+    h2: { fontWeight: 600 },
+    h3: { fontWeight: 600 },
+    button: { textTransform: 'none' },
+  },
+  shape: {
+    borderRadius: 12,
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 10,
+        },
+      },
+    },
+  },
+});

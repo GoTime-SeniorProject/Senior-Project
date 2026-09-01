@@ -1,156 +1,6 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const queries = gql`
-    # Queries for Events and Organizations
-
-    query GetEvents($limit: Int = 25, $offset: Int = 0, $status: EventStatus, $fromDate: Date, $toDate: Date) {
-        getEvents(limit: $limit, offset: $offset, status: $status, fromDate: $fromDate, toDate: $toDate) {
-            id
-            organizationUsername
-            title
-            description
-            eventImg
-            locationType
-            locationId
-            createdBy
-            eventLevel
-            formData
-            eventDate
-            setupTime
-            startTime
-            endTime
-            location
-            eventStatus
-            submittedAt
-            createdAt
-            updatedAt
-            organization {
-            id
-            orgName
-            username
-            bio
-            }
-        }
-    }
-
-    query GetEventById($id: ID!) {
-        getEvent(id: $id) {
-            id
-            organizationUsername
-            title
-            description
-            eventImg
-            locationType
-            locationId
-            createdBy
-            eventLevel
-            formData
-            eventDate
-            setupTime
-            startTime
-            endTime
-            location
-            eventStatus
-            submittedAt
-            createdAt
-            updatedAt
-            organization { 
-                id
-                orgName
-                username
-                bio
-            }
-        }
-    }
-
-    query GetOrganizations($limit: Int = 25, $offset: Int = 0, $username: String) {
-        getOrganizations(limit: $limit, offset: $offset, username: $username) {
-            id
-            orgName
-            username
-            bio
-            orgImg
-            createdAt
-            updatedAt
-        }
-    }
-
-    query EventsByOrganization($orgUsername: String!, $limit: Int = 25, $offset: Int = 0, $status: EventStatus, $fromDate: Date, $toDate: Date) {
-        getEventsByOrganization(orgUsername: $orgUsername, limit: $limit, offset: $offset, status: $status, fromDate: $fromDate, toDate: $toDate) {
-            id
-            organizationUsername
-            title
-            description
-            eventImg
-            locationType
-            locationId
-            createdBy
-            eventLevel
-            formData
-            eventDate
-            setupTime
-            startTime
-            endTime
-            location
-            eventStatus
-            submittedAt
-            createdAt
-            updatedAt
-        }
-    }
-
-    query GetDbDump($limit: Int = 25, $offset: Int = 0) {
-        getEvents(limit: $limit, offset: $offset) {
-            id
-            organizationUsername
-            title
-            description
-            eventImg
-            locationType
-            locationId
-            eventDate
-            setupTime
-            startTime
-            endTime
-            location
-            eventStatus
-            submittedAt
-            createdAt
-            updatedAt
-            organization { 
-                id
-                orgName
-                username
-                bio
-            }
-        }
-        getOrganizations(limit: $limit, offset: $offset) {
-            id
-            orgName
-            username
-            bio
-            orgImg
-            createdAt
-            updatedAt
-        }
-        getUsers(limit: $limit, offset: $offset) {
-            id
-            firstName
-            lastName
-            username
-            profileImg
-            password
-            organization {
-                id
-                orgName
-                username
-                bio
-                orgImg
-            }
-            createdAt
-            updatedAt
-        }
-    }
 
     query GetUsers($limit: Int = 25, $offset: Int = 0, $username: String) {
         getUsers(limit: $limit, offset: $offset, username: $username) {
@@ -160,8 +10,6 @@ export const queries = gql`
             username
             profileImg
             password
-            role
-            organization { id orgName username bio orgImg }
             createdAt
             updatedAt
         }
@@ -175,8 +23,6 @@ export const queries = gql`
             username
             profileImg
             password
-            role
-            organization { id orgName username bio orgImg }
             createdAt
             updatedAt
         }
@@ -189,64 +35,7 @@ export const queries = gql`
             lastName
             username
             profileImg
-            role
-            organization { id orgName username bio orgImg }
             password
-        }
-    }
-
-    # Purchases
-    query GetPurchases($limit: Int = 25, $offset: Int = 0) {
-        getPurchases(limit: $limit, offset: $offset) {
-            id
-            organizationUsername
-            dateSubmitted
-            itemTitle
-            itemCategory
-            eventId
-            orderStatus
-            itemCost
-            organization { id orgName username }
-        }
-    }
-
-    query GetPurchase($id: ID!) {
-        getPurchase(id: $id) {
-            id
-            organizationUsername
-            dateSubmitted
-            itemTitle
-            itemCategory
-            eventId
-            orderStatus
-            itemCost
-            organization { id orgName username }
-        }
-    }
-
-    query PurchasesByOrganization($orgUsername: String!, $limit: Int = 25, $offset: Int = 0) {
-        getPurchasesByOrganization(orgUsername: $orgUsername, limit: $limit, offset: $offset) {
-            id
-            organizationUsername
-            dateSubmitted
-            itemTitle
-            itemCategory
-            eventId
-            orderStatus
-            itemCost
-        }
-    }
-
-    # Locations
-
-    query GetOnCampus($limit: Int = 25, $offset: Int = 0) {
-        getLocations(limit: $limit, offset: $offset) {
-            id
-            buildingCode
-            buildingDisplayName
-            roomTitle
-            roomType
-            maxCapacity
         }
     }
 `;

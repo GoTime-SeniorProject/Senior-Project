@@ -1,102 +1,142 @@
-import { Form, Input, Button, Typography, message } from "antd";
-import { UserOutlined, LockOutlined } from "@ant-design/icons";
-import { useAuth } from '../../auth/AuthProvider';
-import heroImg from "../assets/login-hero.jpg";
-import LoginLogo from "../assets/LoginLogo.svg";
-
-const { Title, Paragraph, Link } = Typography;
+import { useState } from 'react';
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  IconButton,
+  InputAdornment,
+  Link,
+  Paper,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { LockOutlined, PersonOutline, Visibility, VisibilityOff } from '@mui/icons-material';
+import { useAuth } from '../../auth/useAuth';
 
 export function LoginContent() {
-    const auth = useAuth();
-    const [messageApi, contextHolder] = message.useMessage();
+  const auth = useAuth();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
-        const onFinish = async (values: any) => {
-            const username = values.username?.trim();
-            const password = values.password;
-            try {
-                const success = await auth.login(username, password);
-                if (success) {
-                    messageApi.success('Signed in');
-                } else {
-                    messageApi.error('Invalid username or password');
-                }
-            } catch (err) {
-                console.error(err);
-                messageApi.error('Login failed');
-            }
-        };
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
 
-    return (
-        <>
-        {contextHolder}
-        <div className="relative flex flex-col md:flex-row-reverse min-h-screen">
+    const success = await auth.login(username.trim(), password);
+    if (!success) {
+      setError('Invalid username or password');
+    }
+  };
 
-        {/* large screens: logo pinned to top-left */}
-        <img
-            className="hidden md:block absolute top-8 left-8 h-12 w-auto z-50"
-            src={LoginLogo}
-            alt="GreenLight logo"
-        />
-            <div
-                className="md:w-1/2 w-full h-56 md:h-auto"
-                style={{
-                    backgroundImage: `url(${heroImg})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                }}
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: 'background.default',
+        p: 2,
+      }}
+    >
+      <Container maxWidth='sm'>
+        <Paper elevation={2} sx={{ p: 4, borderRadius: 3 }}>
+          <Typography variant='h4' component='h1' gutterBottom fontWeight={600}>
+            Welcome back
+          </Typography>
+          <Typography variant='body1' color='text.secondary' gutterBottom>
+            Sign in to continue to Senior Project.
+          </Typography>
+
+          {error && (
+            <Alert severity='error' sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          <Box
+            component='form'
+            onSubmit={handleSubmit}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+          >
+            <TextField
+              label='Username'
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              fullWidth
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position='start'>
+                      <PersonOutline color='disabled' />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              disabled={auth.loading}
             />
+            <TextField
+              label='Password'
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              fullWidth
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position='start'>
+                      <LockOutlined color='disabled' />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        edge='end'
+                        disabled={auth.loading}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              disabled={auth.loading}
+            />
+            <Button
+              type='submit'
+              variant='contained'
+              size='large'
+              fullWidth
+              disabled={auth.loading}
+            >
+              {auth.loading ? 'Signing in...' : 'Sign in'}
+            </Button>
+          </Box>
 
-            <div className="md:w-1/2 w-full flex items-center justify-center">
-                <div className="w-full max-w-md p-8">
-
-                    {/* small/medium screens: centered logo */}
-                    <div className="block md:hidden mt-6 mb-12 flex justify-center">
-                        <img
-                            src={LoginLogo}
-                            alt="GreenLight logo"
-                            className="h-12 w-auto"
-                        />
-                    </div>
-
-                    <div className="pb-4">
-                        <Title level={1} >Welcome Back</Title>
-                        <Title level={5} className="regular">Sign in to continue to your account.</Title>
-                    </div>
-                    
-                    <Form name="login" initialValues={{ remember: true }} onFinish={onFinish} layout="vertical">
-                        <Form.Item
-                            name="username"
-                            label="Username"
-                            rules={[{ required: true, message: "Please input your username" }]}
-                        >
-                                <Input prefix={<UserOutlined />} placeholder="Username" disabled={auth.loading} />
-                        </Form.Item>
-
-                        <Form.Item
-                            name="password"
-                            label="Password"
-                            rules={[{ required: true, message: "Please input your password" }]}
-                        >
-                                <Input.Password prefix={<LockOutlined />} placeholder="Password" disabled={auth.loading} />
-                        </Form.Item>
-
-                        <Form.Item>
-                                <Button type="primary" htmlType="submit" block loading={auth.loading} disabled={auth.loading}>
-                                    Login
-                                </Button>
-                        </Form.Item>
-                        <Paragraph>
-                            New to GreenLight?  <Link strong href="#">Create an account</Link>
-                        </Paragraph>
-                        <Paragraph>
-                            Forgot Password?  <Link strong href="#">Retrieve Login</Link>
-                        </Paragraph>
-                    </Form>
-                </div>
-            </div>
-        </div>
-        </>
-    );
+          <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Typography variant='body2'>
+              New to Senior Project?{' '}
+              <Link href='#' underline='hover'>
+                Create an account
+              </Link>
+            </Typography>
+            <Typography variant='body2'>
+              <Link href='#' underline='hover'>
+                Forgot password?
+              </Link>
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
+  );
 }
 
 export default LoginContent;

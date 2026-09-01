@@ -1,5 +1,5 @@
 import { LoginContent } from '../components/organisms/login';
 
 export default function LoginRoute() {
-    return <LoginContent />;
+  return <LoginContent />;
 }
